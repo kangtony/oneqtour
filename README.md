@@ -28,6 +28,29 @@ CI/CD 설정
 
 ![image](https://user-images.githubusercontent.com/58426170/173987544-023b846a-2ca9-4340-adea-25cb005799ff.png)
 
+### 주요 문법 및 사용법
+
+# MSA 서비스 확인 법 
+netstat -lntp |grep 808
+
+http GET :8081/{servicename}
+- key, value 확인 후 
+- 예시 : http :8081/orders productId=1 productName="TV" qty=3  
+
+- 서비스 확인후 
+
+
+# pub/sub 테스트 
+Tip: 분리된 환경에서 단위 구현/테스트하기
+이벤트를 수신하여 처리하는 Delivery Service 를 구현하는 팀 입장에서 이벤트를 발생시키는 서비스를 직접 실행하지 않고도 테스트할 수 있는 방법
+
+kafka producer 를 실행한 후,
+/usr/local/kafka/bin/kafka-console-producer.sh --broker-list http://localhost:9092 --topic shopmall
+
+Order 에서 발행했을 이벤트의 JSON 을 직접 집어넣는다:
+{"eventType":"OrderPlaced","id":1,"productId":1,"qty":3,"productName":"TV"}
+Delivery 의 PolicyHandler 에 이벤트가 수신됨을 확인한다.
+
 
 
 <b>기능적 요구사항</b>
