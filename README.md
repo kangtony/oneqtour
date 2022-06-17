@@ -5,11 +5,66 @@
  - 목돈/잔돈/포인트 모아 MD가 추천한 여행상품(적금+여행할인예약)을 구독하는 서비스 
 - 본 킹스톤은 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설계/구현/운영 전단계를 실습하여 구성한 예제입니다. 
 이는 클라우드 네이티브 애플리케이션의 개발에 요구되는 체크포인트들을 통과하기 위한 예시 답안을 포함합니다.
-```
+```javascript
 체크포인트 : https://workflowy.com/s/assessment-check-po/T5YrzcMewfo4J6LW
 ```
-## 환경설명 
-kafka는 기본 설치 및 수행 되어 있음. 
+## 실행하기 
+- kafka는 기본 설치 및 수행 되어 있음. 
+- 3개의 마이크로 서비스로 구성되어 있음 
+  - product-domain : MD가 상품을 등록하는 MSA
+  - store-domain : MD등록한 상품을 Event로 상품 등록하며, 고객등록, 상품등록, 상품구매하는 MSA 
+  - view-domain : 쇼핑몰(store-domain)의 정보를 보여주고, 등록,구매 등이 이루어지는 front-end MSA 
+
+0. 이벤트큐상태 확인 하기 
+```javascript
+ $kafka_home/bin/kafka-console-consumer.sh --bootstrap-server :9092 --topic tour 
+```
+2. Product도메인 실행하기 
+```javascript
+  cd /home/project/ops-deploy-my-app/capstone-project-base-main/product-domain
+  mvn spring-boot:run
+```
+
+3. Store도메인 실행하기 
+```javascript
+  cd /home/project/ops-deploy-my-app/capstone-project-base-main/store-domain
+  mvn spring-boot:run
+```
+
+4. Gateway 실행하기 
+
+```javascript
+  cd /home/project/ops-deploy-my-app/capstone-project-base-main/gateway
+  mvn spring-boot:run
+```
+5. view도메인 실행하기 
+```javascript
+  cd /home/project/ops-deploy-my-app/capstone-project-base-main/view-domain
+  mvn spring-boot:run
+```
+# Kafka Event 송출/수신과 관련된 파일들
+## 설정관련
+- pom.xml
+- Application.java 의 @EnableBinding(KafkaProcessor.java)
+- kafka/KafkaProcessor.java
+- resources/application.yaml
+## 구현관련
+- AbstractEvent.java
+- PolicyHandler.java
+- domain event 들: PetReserved.java / PetUpdated.java
+
+# Gateway 를 통한 진입점 통일(8080)
+
+```
+cd gateway
+mvn spring-boot:run
+```
+서비스가 기동된 후, gateway 로 단일화된 주소로 접근이 가능함을 확인합니다:
+
+```
+http localhost:8088/pets         # service url of pet domain
+http localhost:8088/cartItems    # service url of store domain
+```
 
 ## 테스트
 하테오스 확인 http :8081
